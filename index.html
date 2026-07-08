@@ -1,58 +1,414 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <meta charset='utf-8'>
-    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>SMO Randomizer</title>
-    <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <style>
-        html {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            width: 100%;
-            height: 100%;
-        }
+<meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MoonRouteHQ — Super Mario Odyssey Speedrunning Hub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink-dark:#0b1526;
+    --ink:#14213d;
+    --ink-soft:#1c2b4d;
+    --moon:#f4c95d;
+    --moon-soft:#d9ab3d;
+    --cappy:#e6533c;
+    --paper:#f4efe2;
+    --slate:#8b98b8;
+    --line:rgba(244,239,226,0.14);
+    --radius:14px;
+  }
 
-        body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden;
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: black;
-        }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 620px at 12% -10%, rgba(244,201,93,0.10), transparent 60%),
+      radial-gradient(900px 700px at 100% 0%, rgba(230,83,60,0.08), transparent 55%),
+      var(--ink-dark);
+    color:var(--paper);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
 
-        iframe {
-            border: none;
-            width: 1280px;
-            height: 720px;
-            overflow: hidden;
-        }
+  h1,h2,h3,.brand-name{font-family:'Unbounded',sans-serif;}
 
-        svg {
-            height: 100%;
-            width: 100%;
-            display: block;
-            overflow: hidden;
-        }
-    </style>
+  .mono{font-family:'IBM Plex Mono',monospace;}
+
+  a{color:inherit;}
+
+  /* ---------- top nav (ticket-stub tabs) ---------- */
+  header.top{
+    position:sticky; top:0; z-index:40;
+    background:rgba(11,21,38,0.86);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--line);
+  }
+  .top-inner{
+    max-width:1180px; margin:0 auto; padding:16px 24px;
+    display:flex; align-items:center; gap:28px; flex-wrap:wrap;
+  }
+  .brand{display:flex; align-items:center; gap:10px; flex-shrink:0;}
+  .brand-name{font-size:1.05rem; font-weight:800; letter-spacing:0.01em;}
+  .brand-name em{font-style:normal; color:var(--moon);}
+
+  nav.tabs{display:flex; gap:6px; flex-wrap:wrap; overflow-x:auto;}
+  .tab-btn{
+    position:relative;
+    background:transparent; border:1px solid transparent;
+    color:var(--slate); font-family:'Inter',sans-serif; font-weight:500; font-size:0.86rem;
+    padding:9px 15px; border-radius:999px; cursor:pointer; white-space:nowrap;
+    transition:color .15s ease, background .15s ease, border-color .15s ease;
+  }
+  .tab-btn:hover{color:var(--paper);}
+  .tab-btn[aria-selected="true"]{
+    color:var(--ink-dark); background:var(--moon); border-color:var(--moon); font-weight:600;
+  }
+  .tab-btn:focus-visible{outline:2px solid var(--moon); outline-offset:2px;}
+
+  main{max-width:1180px; margin:0 auto; padding:48px 24px 100px;}
+  .panel{display:none; animation:rise .35s ease both;}
+  .panel.active{display:block;}
+  @keyframes rise{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+  @media (prefers-reduced-motion:reduce){
+    .panel{animation:none;}
+  }
+
+  /* ---------- shared bits ---------- */
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'IBM Plex Mono',monospace; font-size:0.72rem; letter-spacing:0.14em;
+    text-transform:uppercase; color:var(--moon); margin-bottom:14px;
+  }
+  .eyebrow::before{content:""; width:16px; height:1px; background:var(--moon);}
+
+  .section-head{max-width:640px; margin-bottom:36px;}
+  .section-head h2{font-size:1.9rem; margin:0 0 10px; font-weight:600; line-height:1.15;}
+  .section-head p{color:var(--slate); margin:0; line-height:1.6; font-size:0.98rem;}
+
+  .grid{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px;}
+
+  .card{
+    background:var(--ink-soft); border:1px solid var(--line); border-radius:var(--radius);
+    padding:22px; position:relative; overflow:hidden;
+    transition:transform .18s ease, border-color .18s ease;
+  }
+  .card:hover{transform:translateY(-3px); border-color:rgba(244,201,93,0.4);}
+  .card h3{font-size:1.02rem; margin:0 0 8px; font-weight:600;}
+  .card p{color:var(--slate); font-size:0.88rem; line-height:1.55; margin:0 0 16px;}
+  .card .stamp{
+    position:absolute; top:14px; right:14px;
+    font-family:'IBM Plex Mono',monospace; font-size:0.62rem; letter-spacing:0.08em;
+    color:var(--slate); border:1px solid var(--line); border-radius:999px;
+    padding:3px 9px; text-transform:uppercase;
+  }
+  .card .stamp.tracked{color:var(--moon); border-color:rgba(244,201,93,0.4);}
+  .card .stamp.archived{color:var(--cappy); border-color:rgba(230,83,60,0.4);}
+
+  .link-out{
+    display:inline-flex; align-items:center; gap:6px;
+    font-size:0.84rem; font-weight:600; color:var(--moon);
+    text-decoration:none; border-bottom:1px solid transparent;
+  }
+  .link-out:hover{border-color:var(--moon);}
+  .link-out svg{width:12px; height:12px;}
+
+  /* ---------- HOME ---------- */
+  .hero{
+    display:grid; grid-template-columns:1.1fr 0.9fr; gap:48px; align-items:center;
+    padding:20px 0 56px; border-bottom:1px solid var(--line); margin-bottom:56px;
+  }
+  @media (max-width:860px){ .hero{grid-template-columns:1fr;} }
+  .hero h1{font-size:clamp(2.1rem,4vw,3.1rem); line-height:1.08; margin:0 0 18px; font-weight:600;}
+  .hero h1 em{font-style:normal; color:var(--moon);}
+  .hero p.lede{color:var(--slate); font-size:1.05rem; line-height:1.65; max-width:46ch; margin:0 0 26px;}
+  .hero-actions{display:flex; gap:12px; flex-wrap:wrap;}
+  .btn{
+    font-family:'Inter',sans-serif; font-weight:600; font-size:0.9rem;
+    padding:12px 20px; border-radius:10px; cursor:pointer; border:1px solid transparent;
+    transition:transform .15s ease, background .15s ease;
+  }
+  .btn:hover{transform:translateY(-2px);}
+  .btn-primary{background:var(--moon); color:var(--ink-dark);}
+  .btn-ghost{background:transparent; border-color:var(--line); color:var(--paper);}
+
+  .route-map{position:relative; height:280px;}
+  .route-map svg{width:100%; height:100%;}
+  .rm-path{
+    fill:none; stroke:var(--moon-soft); stroke-width:2; stroke-dasharray:6 8;
+    stroke-linecap:round; stroke-dashoffset:400; animation:draw 2.4s ease forwards .3s;
+  }
+  @keyframes draw{to{stroke-dashoffset:0;}}
+  @media (prefers-reduced-motion:reduce){ .rm-path{animation:none; stroke-dashoffset:0;} }
+  .rm-node{fill:var(--ink); stroke:var(--moon); stroke-width:1.6;}
+  .rm-node-label{fill:var(--slate); font-family:'IBM Plex Mono',monospace; font-size:9px;}
+
+  .quicklinks{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-top:8px;}
+  .quicklink{
+    display:flex; flex-direction:column; gap:6px; padding:16px;
+    background:var(--ink-soft); border:1px solid var(--line); border-radius:var(--radius);
+    cursor:pointer; text-align:left; color:inherit; font-family:inherit;
+    transition:border-color .15s ease, transform .15s ease;
+  }
+  .quicklink:hover{border-color:rgba(244,201,93,0.45); transform:translateY(-2px);}
+  .quicklink .ql-count{font-family:'IBM Plex Mono',monospace; color:var(--moon); font-size:0.78rem;}
+  .quicklink .ql-title{font-weight:600; font-size:0.94rem;}
+
+  /* ---------- LEADERBOARD table ---------- */
+  .lb-table{width:100%; border-collapse:collapse; margin-top:10px;}
+  .lb-table th{
+    text-align:left; font-family:'IBM Plex Mono',monospace; font-size:0.68rem;
+    letter-spacing:0.08em; text-transform:uppercase; color:var(--slate);
+    border-bottom:1px solid var(--line); padding:10px 12px; font-weight:500;
+  }
+  .lb-table td{padding:12px; border-bottom:1px solid var(--line); font-size:0.88rem;}
+  .lb-table tr:last-child td{border-bottom:none;}
+  .lb-time{font-family:'IBM Plex Mono',monospace; color:var(--moon);}
+  .lb-block{margin-bottom:44px;}
+  .lb-block h3{font-size:1.05rem; margin:0 0 4px;}
+  .lb-block .lb-sub{color:var(--slate); font-size:0.85rem; margin:0 0 4px;}
+
+  footer{border-top:1px solid var(--line); padding:26px 24px; text-align:center; color:var(--slate); font-size:0.8rem;}
+  footer span{color:var(--moon);}
+</style>
 </head>
-
 <body>
-    <svg xmlns="http://www.w3.org/2000/svg"  
-        viewBox="0 0 1280 720"
-        style="width: 100vw; height: 100vh;"
-        preserveAspectRatio="xMidYMid meet">
-        <foreignObject width="1280" height="720">
-            <iframe xmlns="http://www.w3.org/1999/xhtml" allow="gamepad" scrolling="no"
-                src="html/USen/index.html?????"></iframe>
-        </foreignObject>
-    </svg>
-</body>
 
+<header class="top">
+  <div class="top-inner">
+    <div class="brand">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none">
+        <circle cx="13" cy="13" r="12" stroke="#f4c95d" stroke-width="1.4"/>
+        <path d="M13 3a10 10 0 0 0 0 20 8 8 0 1 1 0-20Z" fill="#f4c95d"/>
+      </svg>
+      <span class="brand-name">Moon<em>Route</em>HQ</span>
+    </div>
+    <nav class="tabs" role="tablist" aria-label="Site sections">
+      <button class="tab-btn" role="tab" aria-selected="true" data-tab="home">Home</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="routes">Routes</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="leaderboards">Leaderboards</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="guides">Guides</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="tools">Tools</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="modding">Modding</button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="archive">Archive</button>
+    </nav>
+  </div>
+</header>
+
+<main>
+
+  <!-- ================= HOME ================= -->
+  <section id="home" class="panel active" role="tabpanel">
+    <div class="hero">
+      <div>
+        <span class="eyebrow">Cap. Jump. Capture. Repeat.</span>
+        <h1>Every kingdom.<br>Every route.<br><em>One flight log.</em></h1>
+        <p class="lede">MoonRouteHQ collects Super Mario Odyssey speedrunning routes, leaderboards, guides, and tools into one place — built for new runners learning Cascade Kingdom and veterans chasing Darker Side world records alike.</p>
+        <div class="hero-actions">
+          <button class="btn btn-primary" data-goto="routes">Browse routes</button>
+          <button class="btn btn-ghost" data-goto="guides">Start learning</button>
+        </div>
+      </div>
+      <div class="route-map" aria-hidden="true">
+        <svg viewBox="0 0 320 280">
+          <path class="rm-path" d="M20 230 C 60 180, 40 120, 90 100 S 170 60, 190 90 S 250 60, 290 40"/>
+          <circle class="rm-node" cx="20" cy="230" r="7"/>
+          <text class="rm-node-label" x="0" y="252">CAP</text>
+          <circle class="rm-node" cx="90" cy="100" r="7"/>
+          <text class="rm-node-label" x="66" y="88">CASCADE</text>
+          <circle class="rm-node" cx="190" cy="90" r="7"/>
+          <text class="rm-node-label" x="166" y="112">LAKE</text>
+          <circle class="rm-node" cx="290" cy="40" r="7"/>
+          <text class="rm-node-label" x="252" y="26">METRO</text>
+        </svg>
+      </div>
+    </div>
+
+    <div class="section-head">
+      <span class="eyebrow">Where to next</span>
+      <h2>Jump to a section</h2>
+      <p>Everything on this page is a work in progress — route docs and slide decks get linked in as they're finished.</p>
+    </div>
+    <div class="quicklinks">
+      <button class="quicklink" data-goto="routes"><span class="ql-count">7+ categories</span><span class="ql-title">Speedrun routes</span></button>
+      <button class="quicklink" data-goto="leaderboards"><span class="ql-count">Official + community</span><span class="ql-title">Leaderboards</span></button>
+      <button class="quicklink" data-goto="guides"><span class="ql-count">Glitches · setup · runners</span><span class="ql-title">Guides &amp; tutorials</span></button>
+      <button class="quicklink" data-goto="tools"><span class="ql-count">Translator · bingo · lockout</span><span class="ql-title">Tools</span></button>
+      <button class="quicklink" data-goto="modding"><span class="ql-count">Practice · Kaizo · online</span><span class="ql-title">Modding resources</span></button>
+      <button class="quicklink" data-goto="archive"><span class="ql-count">Retired categories</span><span class="ql-title">Archive</span></button>
+    </div>
+  </section>
+
+  <!-- ================= ROUTES ================= -->
+  <section id="routes" class="panel" role="tabpanel">
+    <div class="section-head">
+      <span class="eyebrow">Routes</span>
+      <h2>Category routes</h2>
+      <p>Moon-by-moon and kingdom-by-kingdom routing for every tracked category. Each card links out to its full route doc.</p>
+    </div>
+    <div class="grid" id="routes-grid"></div>
+  </section>
+
+  <!-- ================= LEADERBOARDS ================= -->
+  <section id="leaderboards" class="panel" role="tabpanel">
+    <div class="section-head">
+      <span class="eyebrow">Leaderboards</span>
+      <h2>Official &amp; community boards</h2>
+      <p>Live standings will populate here once boards are connected. Placeholder rows shown for layout.</p>
+    </div>
+
+    <div class="lb-block">
+      <h3>Any% — Official</h3>
+      <p class="lb-sub">Speedrun.com verified runs</p>
+      <table class="lb-table">
+        <thead><tr><th>Rank</th><th>Runner</th><th>Time</th><th>Platform</th></tr></thead>
+        <tbody>
+          <tr><td>1</td><td>—</td><td class="lb-time">—:—:—</td><td>—</td></tr>
+          <tr><td>2</td><td>—</td><td class="lb-time">—:—:—</td><td>—</td></tr>
+          <tr><td>3</td><td>—</td><td class="lb-time">—:—:—</td><td>—</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="lb-block">
+      <h3>Community categories</h3>
+      <p class="lb-sub">Talkatoo%, bingo races, lockout, and other community-run boards</p>
+      <table class="lb-table">
+        <thead><tr><th>Category</th><th>Top runner</th><th>Time</th></tr></thead>
+        <tbody>
+          <tr><td>Talkatoo% Any%</td><td>—</td><td class="lb-time">—:—:—</td></tr>
+          <tr><td>Minimum Captures</td><td>—</td><td class="lb-time">—:—:—</td></tr>
+          <tr><td>Nipple%</td><td>—</td><td class="lb-time">—:—</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ================= GUIDES ================= -->
+  <section id="guides" class="panel" role="tabpanel">
+    <div class="section-head">
+      <span class="eyebrow">Guides &amp; tutorials</span>
+      <h2>Learn the tech</h2>
+      <p>Glitch write-ups, timer setup, and resources from well-known runners in the community.</p>
+    </div>
+    <div class="grid" id="guides-grid"></div>
+  </section>
+
+  <!-- ================= TOOLS ================= -->
+  <section id="tools" class="panel" role="tabpanel">
+    <div class="section-head">
+      <span class="eyebrow">Tools</span>
+      <h2>Runner utilities</h2>
+      <p>Reference tools for routing, races, and translation work built by the community.</p>
+    </div>
+    <div class="grid" id="tools-grid"></div>
+  </section>
+
+  <!-- ================= MODDING ================= -->
+  <section id="modding" class="panel" role="tabpanel">
+    <div class="section-head">
+      <span class="eyebrow">Modding</span>
+      <h2>Install guides</h2>
+      <p>Setup instructions for practice tooling and gameplay mods used by the speedrunning scene.</p>
+    </div>
+    <div class="grid" id="modding-grid"></div>
+  </section>
+
+  <!-- ================= ARCHIVE ================= -->
+  <section id="archive" class="panel" role="tabpanel">
+    <div class="section-head">
+      <span class="eyebrow">Archive</span>
+      <h2>Retired &amp; deleted categories</h2>
+      <p>Categories and challenge runs that are no longer officially tracked, preserved for history.</p>
+    </div>
+    <div class="grid" id="archive-grid"></div>
+  </section>
+
+</main>
+
+<footer>Fan-made community resource for <span>Super Mario Odyssey</span> speedrunning. Not affiliated with Nintendo.</footer>
+
+<script>
+/*
+  ===== CONTENT DATA =====
+  Drop real Google Slides links into the `link` field for each item below —
+  everything currently points at "#" as a placeholder.
+*/
+const DATA = {
+  routes: [
+    ["Any%", "The fastest clear — minimum required moons, no side content.", "#"],
+    ["World Peace", "Cap through every mandatory story moon across all kingdoms.", "#"],
+    ["All Moons", "Full moon collection route, kingdom by kingdom.", "#"],
+    ["Dark Side", "Post-game moon route through the Dark Side of the Moon.", "#"],
+    ["Darker Side", "The final post-game route — the longest category in the game.", "#"],
+    ["100%", "Every moon, every purple coin, full completion.", "#"],
+    ["Minimum Captures", "Complete the game using the fewest captures possible.", "#"],
+    ["More categories", "Additional and rotating categories — route docs added as they're finished.", "#"],
+  ],
+  guides: [
+    ["Glitch explainers", "Breakdowns of core tech: cap throws, rolling, vaults, and clips.", "#"],
+    ["LiveSplit setup", "Getting LiveSplit and community splits configured for SMO.", "#"],
+    ["Autosplitter setup", "Installing and configuring autosplitters for accurate timing.", "#"],
+    ["Runner resources", "Curated learning material and routes from known community runners.", "#"],
+  ],
+  tools: [
+    ["Talkatoo Translator", "Reference for decoding Talkatoo's hints across languages.", "#"],
+    ["Bingo tools", "Boards and generators for community bingo races.", "#"],
+    ["Lockout resources", "Rule sets and boards for lockout-style races.", "#"],
+    ["Moon lists", "Searchable lists of every moon by kingdom.", "#"],
+    ["Warp painting references", "Reference routes and setups for warp painting strategies.", "#"],
+  ],
+  modding: [
+    ["Practice mod", "Install guide for the community practice mod used to drill routes.", "#"],
+    ["Superstar Mode", "Setup instructions for the Superstar Mode challenge mod.", "#"],
+    ["Kaizo Mode", "Installing the Kaizo Mode hack for expert-level challenge runs.", "#"],
+    ["Online multiplayer", "Getting set up for community online multiplayer sessions.", "#"],
+  ],
+  archive: [
+    ["Retired categories", "Categories that were once tracked but are no longer on official boards.", "#"],
+    ["Deleted runs", "Historical runs removed from leaderboards, kept here for record.", "#"],
+    ["Challenge runs", "Community challenge run variants outside standard categories.", "#"],
+  ],
+};
+
+function cardHTML([title, desc, link], tag){
+  const stampClass = tag === "archived" ? "stamp archived" : "stamp tracked";
+  const stampLabel = tag === "archived" ? "archived" : "tracked";
+  return `<div class="card">
+    <span class="${stampClass}">${stampLabel}</span>
+    <h3>${title}</h3>
+    <p>${desc}</p>
+    <a class="link-out" href="${link}" target="_blank" rel="noopener">View route
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M7 17 17 7M9 7h8v8"/></svg>
+    </a>
+  </div>`;
+}
+
+document.getElementById("routes-grid").innerHTML = DATA.routes.map(i => cardHTML(i, "tracked")).join("");
+document.getElementById("guides-grid").innerHTML = DATA.guides.map(i => cardHTML(i, "tracked")).join("");
+document.getElementById("tools-grid").innerHTML = DATA.tools.map(i => cardHTML(i, "tracked")).join("");
+document.getElementById("modding-grid").innerHTML = DATA.modding.map(i => cardHTML(i, "tracked")).join("");
+document.getElementById("archive-grid").innerHTML = DATA.archive.map(i => cardHTML(i, "archived")).join("");
+
+// ---- tab switching ----
+const tabButtons = document.querySelectorAll(".tab-btn");
+const panels = document.querySelectorAll(".panel");
+
+function activate(tabId){
+  tabButtons.forEach(b => b.setAttribute("aria-selected", b.dataset.tab === tabId ? "true" : "false"));
+  panels.forEach(p => p.classList.toggle("active", p.id === tabId));
+  window.scrollTo({top:0, behavior:"instant"});
+}
+
+tabButtons.forEach(btn => btn.addEventListener("click", () => activate(btn.dataset.tab)));
+document.querySelectorAll("[data-goto]").forEach(el =>
+  el.addEventListener("click", () => activate(el.dataset.goto))
+);
+</script>
+
+</body>
 </html>
